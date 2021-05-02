@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using ReceivingDataViaApiAndWritingToFile.ApiClient;
@@ -19,7 +20,9 @@ namespace ReceivingDataViaApiAndWritingToFile
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            _clientApi.OnProgressChanged += ViewGetPost;
             var posts = await _clientApi.GetListPosts(cancellationToken);
+            _clientFile.OnProgressChanged += ViewWritePost;
             _clientFile.SaveListToFileAsString(posts);
            // _clientFile.SaveListToFileAsJson(posts);
         }
@@ -27,6 +30,16 @@ namespace ReceivingDataViaApiAndWritingToFile
         public Task StopAsync(CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
+        }
+
+        private void ViewGetPost(int number)
+        {
+            Console.WriteLine($"Post {number} ..... Get Ok");   
+        }
+        
+        private void ViewWritePost(int number)
+        {
+            Console.WriteLine($"Post {number} ..... Write Ok");   
         }
     }
 }

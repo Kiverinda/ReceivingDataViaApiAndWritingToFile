@@ -7,19 +7,28 @@ namespace ReceivingDataViaApiAndWritingToFile.FileClient
     public class ClientFile : IClientFile
     {
         readonly string path = @"c:\temp\result.txt";
+        public event ProgressChangeDelegate OnProgressChanged;
+
+        public ClientFile()
+        {
+            OnProgressChanged += delegate {  };
+        }
+        
 
         public void SaveListToFileAsString(List<Post> list)
         {
-            if (!File.Exists(path))
-            {
-                foreach (var post in list)
-                {
-                    File.WriteAllText(path, post.ToString());
-                }
-            }
             foreach (var post in list)
             {
-                File.AppendAllText(path, post.ToString());
+                if (!File.Exists(path))
+                {
+                    File.WriteAllText(path, post.ToString());
+                    OnProgressChanged?.Invoke(post.Id);
+                }
+                else
+                {
+                    File.AppendAllText(path, post.ToString());
+                    OnProgressChanged?.Invoke(post.Id);
+                }
             }
         }
 

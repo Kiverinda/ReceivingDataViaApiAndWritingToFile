@@ -9,10 +9,13 @@ namespace ReceivingDataViaApiAndWritingToFile.ApiClient
     public class ClientApi : IClientApi
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        
+        public event ProgressChangeDelegate OnProgressChanged;
 
         public ClientApi(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
+            OnProgressChanged += delegate { };
         }
 
         public async Task<List<Post>> GetListPosts(CancellationToken cancellationToken)
@@ -29,6 +32,9 @@ namespace ReceivingDataViaApiAndWritingToFile.ApiClient
         {
             var httpClient = _httpClientFactory.CreateClient("JsonplaceholderClient");
             var response = await httpClient.GetAsync($"/posts/{number}");
+            
+            OnProgressChanged(number);
+            
             return JsonConvert.DeserializeObject<Post>(
                 await response.Content.ReadAsStringAsync());
         }
