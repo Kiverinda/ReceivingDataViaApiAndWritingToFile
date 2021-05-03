@@ -7,6 +7,6 @@ namespace ReceivingDataViaApiAndWritingToFile.FileClient
     {
         void SaveListToFileAsString(List<Post> list);
         void SaveListToFileAsJson(List<Post> list);
-        event ProgressChangeDelegate OnProgressChanged;
+        event ProgressChangeDelegate OnProgressWriteChanged;
     }
 }

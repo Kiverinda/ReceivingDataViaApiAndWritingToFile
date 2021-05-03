@@ -3,6 +3,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using Polly;
 using Polly.Registry;
 using ReceivingDataViaApiAndWritingToFile.ApiClient;
@@ -19,11 +21,11 @@ namespace ReceivingDataViaApiAndWritingToFile
                 {
                     IPolicyRegistry<string> registry = services.AddPolicyRegistry();
 
-                    IAsyncPolicy<HttpResponseMessage> httWaitAndpRetryPolicy =
+                    IAsyncPolicy<HttpResponseMessage> httWaitAndRetryPolicy =
                         Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
                             .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt));
 
-                    registry.Add("SimpleWaitAndRetryPolicy", httWaitAndpRetryPolicy);
+                    registry.Add("SimpleWaitAndRetryPolicy", httWaitAndRetryPolicy);
 
                     IAsyncPolicy<HttpResponseMessage> noOpPolicy = Policy.NoOpAsync()
                         .AsAsyncPolicy<HttpResponseMessage>();
@@ -46,9 +48,17 @@ namespace ReceivingDataViaApiAndWritingToFile
                     services.AddSingleton<IClientApi, ClientApi>();
                     services.AddSingleton<IClientFile, ClientFile>();
                     services.AddSingleton<IHostedService, App>();
+                    services.AddTransient<App>()
+                        .AddLogging(loggingBuilder =>
+                        {
+                            loggingBuilder.ClearProviders();
+                            loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                            loggingBuilder.AddNLog();
+                        });
                 });
-
+            
             await builder.RunConsoleAsync();
         }
+        
     }
 }

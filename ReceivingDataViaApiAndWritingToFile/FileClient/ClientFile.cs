@@ -7,11 +7,11 @@ namespace ReceivingDataViaApiAndWritingToFile.FileClient
     public class ClientFile : IClientFile
     {
         readonly string path = @"c:\temp\result.txt";
-        public event ProgressChangeDelegate OnProgressChanged;
+        public event ProgressChangeDelegate OnProgressWriteChanged;
 
         public ClientFile()
         {
-            OnProgressChanged += delegate {  };
+            OnProgressWriteChanged += delegate {  };
         }
         
 
@@ -22,13 +22,12 @@ namespace ReceivingDataViaApiAndWritingToFile.FileClient
                 if (!File.Exists(path))
                 {
                     File.WriteAllText(path, post.ToString());
-                    OnProgressChanged?.Invoke(post.Id);
                 }
                 else
                 {
                     File.AppendAllText(path, post.ToString());
-                    OnProgressChanged?.Invoke(post.Id);
                 }
+                OnProgressWriteChanged?.Invoke(post.Id);
             }
         }
 
